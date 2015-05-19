@@ -1,2 +1,5 @@
 # AudacityLabels
-Import labels from the audacity sound editor, marking soundfile regions.
+Import labels from the audacity[1] sound editor, marking soundfile regions.
+
+
+[1] http://web.audacityteam.org/
