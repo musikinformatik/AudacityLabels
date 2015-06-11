@@ -28,13 +28,14 @@ AudacityLabels {
 	parseAndAddLabels { |string, labelPath|
 		var events = Array.new;
 		var zeilen = string.split(Char.nl);
-		zeilen.do({ |zeile|
+		zeilen.do({ |zeile, i|
 			var daten, t0, t1, wort;
 			daten = zeile.split(Char.tab);
 			if(daten.size >= 3) {
 				t0 = daten[0].replace(",", ".").asFloat; // account for format bug in audacity: convert to dot.
 				t1 = daten[1].replace(",", ".").asFloat;
 				wort = daten[2].asSymbol;
+				if(wort == '') { wort = i };
 				if(dict[wort].notNil) {
 					"Duplicate Labels not supported: %\npath: %".format(wort, labelPath).warn;
 				};
