@@ -34,8 +34,12 @@ AudacityLabels {
 			if(daten.size >= 3) {
 				t0 = daten[0].replace(",", ".").asFloat; // account for format bug in audacity: convert to dot.
 				t1 = daten[1].replace(",", ".").asFloat;
-				wort = daten[2].asSymbol;
-				if(wort == '') { wort = i };
+				wort = daten[2];
+				if(wort.isEmpty or: { wort.every { |char| char.isSpace }}) {
+					wort = i
+				} {
+					wort = wort.asSymbol
+				};
 				if(dict[wort].notNil) {
 					"Duplicate Labels not supported: %\npath: %".format(wort, labelPath).warn;
 				};
