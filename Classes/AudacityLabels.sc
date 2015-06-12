@@ -2,7 +2,7 @@
 
 AudacityLabels {
 
-	var <dict;
+	var <dict, <>verbose = true;
 
 	*new {
 		^super.new.clear
@@ -20,16 +20,23 @@ AudacityLabels {
 		^dict[wort]
 	}
 
+	put { |wort, event|
+		if(dict[wort].notNil) {
+			"Duplicate Labels not supported, overwriting previous label '%'".format(wort).warn;
+		};
+		dict[wort] = event;
+	}
+
 	read { |labelPath|
 		var string = File.use(labelPath, "r", { |file| file.readAllString });
 		this.parseAndAddLabels(string, labelPath);
 	}
 
 	parseAndAddLabels { |string, labelPath|
-		var events = Array.new;
 		var zeilen = string.split(Char.nl);
+		if(verbose) { "Reading labels from: %\n\n".postf(labelPath) };
 		zeilen.do({ |zeile, i|
-			var daten, t0, t1, wort;
+			var daten, t0, t1, wort, event;
 			daten = zeile.split(Char.tab);
 			if(daten.size >= 3) {
 				t0 = daten[0].replace(",", ".").asFloat; // account for format bug in audacity: convert to dot.
@@ -40,10 +47,7 @@ AudacityLabels {
 				} {
 					wort = wort.asSymbol
 				};
-				if(dict[wort].notNil) {
-					"Duplicate Labels not supported: %\npath: %".format(wort, labelPath).warn;
-				};
-				dict[wort] = (
+				event = (
 					wort: wort,
 					t0: t0,
 					t1: t1,
@@ -56,15 +60,18 @@ AudacityLabels {
 						~dur = abs((~t1 - ~t0) / ~rate) + ~gap;
 					}
 				);
-			}
-		})
+				this.put(wort, event);
+				if(verbose) { wort.post; " ".post; }
+			};
+		});
+		if(verbose) { "\n".post };
 	}
 
 }
 
 LabeledSoundFile {
 
-	var <buffers, <dict;
+	var <buffers, <dict, <>verbose = true;
 
 	*new {
 		^super.new.clear
@@ -88,7 +95,7 @@ LabeledSoundFile {
 			var buffer = this.getBuffer(server, soundFilePath);
 			// todo: check if buffer exists and add it to the list.
 			server.sync;
-			labels = AudacityLabels.read(labelPath);
+			labels = AudacityLabels.read(labelPath).verbose_(verbose);
 			labels.dict.keysValuesDo { |key, event|
 				event[\server] = server;
 				event[\buffer] = buffer;
