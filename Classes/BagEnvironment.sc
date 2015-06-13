@@ -47,6 +47,33 @@ BagEnvironment : Environment {
 		^this[key].selectFromBagEnvirNode(choiceFunc)
 	}
 
+	do { |func|
+		var j = 0;
+		super.do { |val, i|
+			if(val.isBagNode) {
+				val.do { |each|
+					func.value(each, j, i);
+					j = j + 1;
+				}
+			} {
+				func.value(val, j, i);
+				j = j + 1;
+			}
+		}
+	}
+
+	keysValuesDo { |func|
+		super.keysValuesDo { |key, val|
+			if(val.isBagNode) {
+				val.do { |each|
+					func.value(key, each)
+				}
+			} {
+				func.value(key, val)
+			}
+		}
+	}
+
 	removeAt { |key|
 		var item = this[key], res;
 		^if(item.isBagNode) {

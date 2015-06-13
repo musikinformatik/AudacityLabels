@@ -2,7 +2,7 @@
 
 AudacityLabels {
 
-	var <dict, <>verbose = true;
+	var <dict, <>verbose = true, <>rejectDuplicates = false;
 
 	*new {
 		^super.new.clear
@@ -13,16 +13,17 @@ AudacityLabels {
 	}
 
 	clear {
-		dict = IdentityDictionary.new;
+		dict = BagEnvironment.new;
 	}
 
 	at { |wort|
-		^dict[wort]
+		^dict.get(wort)
 	}
 
 	put { |wort, event|
-		if(dict[wort].notNil) {
-			"Duplicate Labels not supported, overwriting previous label '%'".format(wort).warn;
+		if(rejectDuplicates and: { dict[wort].notNil }) {
+			"Duplicate Labels not allowed, overwriting previous label '%'".format(wort).warn;
+			dict.removeAt(wort);
 		};
 		dict[wort] = event;
 	}
@@ -71,7 +72,7 @@ AudacityLabels {
 
 LabeledSoundFile {
 
-	var <buffers, <dict, <>verbose = true;
+	var <buffers, <dict, <>verbose = true, <>rejectDuplicates = false;
 
 	*new {
 		^super.new.clear
@@ -80,7 +81,15 @@ LabeledSoundFile {
 	clear {
 		buffers.do { |x| x.free };
 		buffers = [];
-		dict = IdentityDictionary.new;
+		dict = BagEnvironment.new;
+	}
+
+	get { |wort, choiceFunc|
+		^dict.get(wort.asSymbol, choiceFunc ? {|x| x.choose }).copy
+	}
+
+	at { |wort|
+		^dict.get(wort.asSymbol, {|x| x.choose }).copy
 	}
 
 	*read { |soundFilePath, labelPath, server|
@@ -95,12 +104,13 @@ LabeledSoundFile {
 			var buffer = this.getBuffer(server, soundFilePath);
 			// todo: check if buffer exists and add it to the list.
 			server.sync;
-			labels = AudacityLabels.read(labelPath).verbose_(verbose);
+			labels = AudacityLabels.new.verbose_(verbose).rejectDuplicates_(rejectDuplicates);
+			labels.read(labelPath);
 			labels.dict.keysValuesDo { |key, event|
 				event[\server] = server;
 				event[\buffer] = buffer;
 				event[\instrument] = if(buffer.numChannels == 2) { \labelPlayer_2 } { \labelPlayer_1 };
-				this.addEvent(key, event);
+				dict.put(key, event);
 			};
 			finishFunc.value(this);
 		}
@@ -115,30 +125,8 @@ LabeledSoundFile {
 		^buffer
 	}
 
-	getEvent { |wort, choiceFunc|
-		var found = dict[wort.asSymbol];
-		if(found.isNil) { ^this.defaultEvent };
-		if(found.isArray) {
-			found = if(choiceFunc.notNil) { choiceFunc.value(found, this) } { found.choose }
-		};
-		^found.copy
-	}
-
 	defaultEvent {
 		^(type: \rest, dur: 0)
-	}
-
-	addEvent { |key, event|
-		var existing = dict[key];
-		if(existing.isNil) {
-			dict[key] = event
-		} {
-			if(existing.isArray) {
-				dict[key] = existing.add(event)
-			} {
-				dict[key] = [existing, event]
-			}
-		}
 	}
 
 	maxWordSize {
