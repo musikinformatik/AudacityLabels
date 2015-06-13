@@ -43,6 +43,11 @@ BagEnvironment : Environment {
 		}
 	}
 
+	replaceAt { |key, item|
+		super.removeAt(key);
+		super.put(key, item);
+	}
+
 	get { |key, choiceFunc|
 		^this[key].selectFromBagEnvirNode(choiceFunc)
 	}

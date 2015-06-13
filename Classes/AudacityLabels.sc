@@ -23,9 +23,10 @@ AudacityLabels {
 	put { |wort, event|
 		if(rejectDuplicates and: { dict[wort].notNil }) {
 			"Duplicate Labels not allowed, overwriting previous label '%'".format(wort).warn;
-			dict.removeAt(wort);
-		};
-		dict[wort] = event;
+			dict.replaceAt(wort, event);
+		} {
+			dict[wort] = event
+		}
 	}
 
 	read { |labelPath|
@@ -92,6 +93,15 @@ LabeledSoundFile {
 		^dict.get(wort.asSymbol, {|x| x.choose }).copy
 	}
 
+	put { |wort, event|
+		if(rejectDuplicates and: { dict[wort].notNil }) {
+			"Duplicate Labels not allowed, overwriting previous label '%'".format(wort).warn;
+			dict.replaceAt(wort, event);
+		} {
+			dict[wort] = event
+		}
+	}
+
 	*read { |soundFilePath, labelPath, server|
 		^this.new.read(soundFilePath, labelPath, server)
 	}
@@ -106,11 +116,11 @@ LabeledSoundFile {
 			server.sync;
 			labels = AudacityLabels.new.verbose_(verbose).rejectDuplicates_(rejectDuplicates);
 			labels.read(labelPath);
-			labels.dict.keysValuesDo { |key, event|
+			labels.dict.keysValuesDo { |wort, event|
 				event[\server] = server;
 				event[\buffer] = buffer;
 				event[\instrument] = if(buffer.numChannels == 2) { \labelPlayer_2 } { \labelPlayer_1 };
-				dict.put(key, event);
+				this.put(wort, event);
 			};
 			finishFunc.value(this);
 		}
