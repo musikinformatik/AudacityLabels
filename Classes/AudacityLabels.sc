@@ -111,15 +111,22 @@ LabeledSoundFile {
 	}
 
 	get { |wort, choiceFunc|
-		if(choiceFunc.notNil) {
-			choiceFunc.(dict.at(wort))
-		} {
-			dict[wort].choose
-		}.copy
+		var value = dict.at(wort.asSymbol);
+		^if(value.isNil) { nil } {
+			if(value.isArray) {
+				if(choiceFunc.notNil) {
+					choiceFunc.(dict.at(wort))
+				} {
+					value.choose
+				}
+			} {
+				value
+			}.copy
+		}
 	}
 
 	at { |wort|
-		^dict.at(wort.asSymbol).choose.copy
+		^this.get(wort)
 	}
 
 
@@ -134,10 +141,11 @@ LabeledSoundFile {
 		if(server.serverRunning.not) { "Server not running!".warn; ^this };
 
 		fork {
+			var defName, bufevent;
 			var buffer = this.getBuffer(server, soundFilePath);
-			var defName = if(buffer.numChannels == 2) { \labelPlayer_2 } { \labelPlayer_1 };
-			var bufevent = (server: server, buffer: buffer,instrument: defName);
 			server.sync;
+			defName = if(buffer.numChannels == 2) { \labelPlayer_2 } { \labelPlayer_1 };
+			bufevent = (server: server, buffer: buffer,instrument: defName);
 			labels = AudacityLabels(rejectDuplicates).verbose_(verbose);
 			labels.read(labelPath);
 			labels.dict.addProperties(bufevent);
