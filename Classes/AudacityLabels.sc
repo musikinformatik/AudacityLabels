@@ -1,11 +1,43 @@
+LabelsDictionary : IdentityDictionary {
+
+	var <>rejectDuplicates = false;
+
+	*new { |rejectDuplicates = false|
+		^super.new.rejectDuplicates_(rejectDuplicates)
+	}
+
+	addAll { |wort ... event|
+		var old = this[wort];
+		if(old.isNil) { this[wort] = event } {
+			if(rejectDuplicates and: { this[wort].notNil }) {
+				"Duplicate Labels not allowed, overwriting previous label '%'".format(wort).warn;
+				this[wort] = event.unbubble
+			} {
+				this[wort] = this[wort] ++ event
+			}
+		}
+	}
+
+	addProperties { |propertiesDict|
+		this.do { |item|
+			if(item.isArray) {
+				item.do { |event| event.putAll(propertiesDict) }
+			} {
+				item.putAll(propertiesDict)
+			}
+		}
+	}
+
+}
 
 
 AudacityLabels {
 
-	var <dict, <>verbose = true, <>rejectDuplicates = false;
+	var <rejectDuplicates = false;
+	var <dict, <>verbose = true;
 
-	*new {
-		^super.new.clear
+	*new { |rejectDuplicates|
+		^super.newCopyArgs(rejectDuplicates).clear
 	}
 
 	*read { |labelPath|
@@ -13,21 +45,13 @@ AudacityLabels {
 	}
 
 	clear {
-		dict = BagEnvironment.new;
+		dict = LabelsDictionary.new(rejectDuplicates);
 	}
 
 	at { |wort|
-		^dict.get(wort)
+		^dict.at(wort)
 	}
 
-	put { |wort, event|
-		if(rejectDuplicates and: { dict[wort].notNil }) {
-			"Duplicate Labels not allowed, overwriting previous label '%'".format(wort).warn;
-			dict.replaceAt(wort, event);
-		} {
-			dict[wort] = event
-		}
-	}
 
 	read { |labelPath|
 		var string = File.use(labelPath, "r", { |file| file.readAllString });
@@ -62,7 +86,7 @@ AudacityLabels {
 						~dur = abs((~t1 - ~t0) / ~rate) + ~gap;
 					}
 				);
-				this.put(wort, event);
+				dict.addAll(wort, event);
 				if(verbose) { wort.post; " ".post; }
 			};
 		});
@@ -73,34 +97,32 @@ AudacityLabels {
 
 LabeledSoundFile {
 
-	var <buffers, <dict, <>verbose = true, <>rejectDuplicates = false;
+	var <rejectDuplicates = false;
+	var <buffers, <dict, <>verbose = true;
 
-	*new {
-		^super.new.clear
+	*new { |rejectDuplicates = false|
+		^super.newCopyArgs(rejectDuplicates).clear
 	}
 
 	clear {
 		buffers.do { |x| x.free };
 		buffers = [];
-		dict = BagEnvironment.new;
+		dict = LabelsDictionary.new(rejectDuplicates);
 	}
 
 	get { |wort, choiceFunc|
-		^dict.get(wort.asSymbol, choiceFunc ? {|x| x.choose }).copy
+		if(choiceFunc.notNil) {
+			choiceFunc.(dict.at(wort))
+		} {
+			dict[wort].choose
+		}.copy
 	}
 
 	at { |wort|
-		^dict.get(wort.asSymbol, {|x| x.choose }).copy
+		^dict.at(wort.asSymbol).choose.copy
 	}
 
-	put { |wort, event|
-		if(rejectDuplicates and: { dict[wort].notNil }) {
-			"Duplicate Labels not allowed, overwriting previous label '%'".format(wort).warn;
-			dict.replaceAt(wort, event);
-		} {
-			dict[wort] = event
-		}
-	}
+
 
 	*read { |soundFilePath, labelPath, server|
 		^this.new.read(soundFilePath, labelPath, server)
@@ -110,17 +132,17 @@ LabeledSoundFile {
 		var labels;
 		server = server ? Server.default;
 		if(server.serverRunning.not) { "Server not running!".warn; ^this };
+
 		fork {
 			var buffer = this.getBuffer(server, soundFilePath);
-			// todo: check if buffer exists and add it to the list.
+			var defName = if(buffer.numChannels == 2) { \labelPlayer_2 } { \labelPlayer_1 };
+			var bufevent = (server: server, buffer: buffer,instrument: defName);
 			server.sync;
-			labels = AudacityLabels.new.verbose_(verbose).rejectDuplicates_(rejectDuplicates);
+			labels = AudacityLabels(rejectDuplicates).verbose_(verbose);
 			labels.read(labelPath);
+			labels.dict.addProperties(bufevent);
 			labels.dict.keysValuesDo { |wort, event|
-				event[\server] = server;
-				event[\buffer] = buffer;
-				event[\instrument] = if(buffer.numChannels == 2) { \labelPlayer_2 } { \labelPlayer_1 };
-				this.put(wort, event);
+				dict.addAll(wort, *event);
 			};
 			finishFunc.value(this);
 		}
@@ -189,15 +211,3 @@ LabeledSoundFile {
 
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
