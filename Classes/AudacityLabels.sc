@@ -6,14 +6,18 @@ LabelsDictionary : IdentityDictionary {
 		^super.new.rejectDuplicates_(rejectDuplicates)
 	}
 
-	addAll { |wort ... event|
+	defaultEvent {
+		^(type: \rest, dur: 0)
+	}
+
+	addAll { |wort ... events|
 		var old = this[wort];
-		if(old.isNil) { this[wort] = event } {
+		if(old.isNil) { this[wort] = events } {
 			if(rejectDuplicates and: { this[wort].notNil }) {
 				"Duplicate Labels not allowed, overwriting previous label '%'".format(wort).warn;
-				this[wort] = event.unbubble
+				this[wort] = events.unbubble
 			} {
-				this[wort] = this[wort] ++ event
+				this[wort] = this[wort] ++ events
 			}
 		}
 	}
@@ -28,10 +32,35 @@ LabelsDictionary : IdentityDictionary {
 		}
 	}
 
+	get { |wort, choiceFunc|
+		var value = this.at(wort.asSymbol);
+		if(wort.isSequenceableCollection) {
+			^wort.collect { |each| this.get(each, choiceFunc) };
+		};
+		^if(value.isNil) { nil } {
+			if(value.isArray) {
+				if(choiceFunc.notNil) {
+					choiceFunc.(value)
+				} {
+					value.choose
+				}
+			} {
+				value
+			}.copy
+		}
+	}
+
+	all { |choiceFunc, sortFunc|
+		var values;
+		values = this.get(this.keys.asArray, choiceFunc);
+		sortFunc = sortFunc ? { |a, b| a[\t0] < b[\t0] };
+		^values.sort(sortFunc)
+	}
+
+
 }
 
-
-AudacityLabels {
+AbstractAudacityLabels {
 
 	var <rejectDuplicates = false;
 	var <dict, <>verbose = true;
@@ -40,18 +69,26 @@ AudacityLabels {
 		^super.newCopyArgs(rejectDuplicates).clear
 	}
 
-	*read { |labelPath|
-		^this.new.read(labelPath)
-	}
-
 	clear {
 		dict = LabelsDictionary.new(rejectDuplicates);
 	}
 
-	at { |wort|
-		^dict.at(wort)
+	get { |wort, choiceFunc|
+		^dict.get(wort, choiceFunc)
 	}
 
+	at { |wort|
+		^dict.get(wort)
+	}
+}
+
+
+AudacityLabels : AbstractAudacityLabels {
+
+
+	*read { |labelPath|
+		^this.new.read(labelPath)
+	}
 
 	read { |labelPath|
 		var string = File.use(labelPath, "r", { |file| file.readAllString });
@@ -95,10 +132,9 @@ AudacityLabels {
 
 }
 
-LabeledSoundFile {
+LabeledSoundFile : AbstractAudacityLabels {
 
-	var <rejectDuplicates = false;
-	var <buffers, <dict, <>verbose = true;
+	var <buffers;
 
 	*new { |rejectDuplicates = false|
 		^super.newCopyArgs(rejectDuplicates).clear
@@ -109,26 +145,6 @@ LabeledSoundFile {
 		buffers = [];
 		dict = LabelsDictionary.new(rejectDuplicates);
 	}
-
-	get { |wort, choiceFunc|
-		var value = dict.at(wort.asSymbol);
-		^if(value.isNil) { nil } {
-			if(value.isArray) {
-				if(choiceFunc.notNil) {
-					choiceFunc.(dict.at(wort))
-				} {
-					value.choose
-				}
-			} {
-				value
-			}.copy
-		}
-	}
-
-	at { |wort|
-		^this.get(wort)
-	}
-
 
 
 	*read { |soundFilePath, labelPath, server|
@@ -165,10 +181,6 @@ LabeledSoundFile {
 		^buffer
 	}
 
-	defaultEvent {
-		^(type: \rest, dur: 0)
-	}
-
 	maxWordSize {
 		var max = 0;
 		dict.keysDo { |name| max = max(max, name.asString.size) };
@@ -176,6 +188,8 @@ LabeledSoundFile {
 	}
 
 	*initClass {
+
+		Class.initClassTree(SynthDescLib);
 
 		SynthDef(\labelPlayer_1, { |out = 0, rate = 1, t0, t1, buffer, pan, amp = 0.1|
 			var sustain;
@@ -218,4 +232,8 @@ LabeledSoundFile {
 
 
 	}
+
 }
+
+
+
