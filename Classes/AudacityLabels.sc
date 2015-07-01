@@ -80,6 +80,11 @@ AbstractAudacityLabels {
 	at { |wort|
 		^dict.get(wort)
 	}
+
+	all { |choiceFunc, sortFunc|
+		^dict.all(choiceFunc, sortFunc)
+	}
+
 }
 
 
