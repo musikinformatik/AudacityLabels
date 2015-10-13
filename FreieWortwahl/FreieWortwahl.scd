@@ -117,8 +117,31 @@ SynthDef(\raum, { |out, gate = 1|
 )
 
 ~versprechen.value("zwang entgegen ergebnis zwergenaufstand uhu .");
+
+
 ~versprechen.value("zwang entgegen ergebnis zwergenaufstand uhu uhu uhu .");
 ~versprechen.value("zwang entgegen ergebnis zwergenaufstand % ? uhu uhu uhu ."); // immer den uhu am ende!
+
+
+~labels.dict.keys
+
+
+~versprechen.value("zwang liebe . alleine liebe entgegen n liebe");
+
+(
+preProcessor = { |str|
+	if(str.beginsWith("--")) { "~versprechen.value(\"%\")".format(str.drop(2)) } { str }
+};
+)
+
+
+--ergebnis
+--zwang alleine n uhu zwergenaufstand
+
+
+
+
+
 
 
 
