@@ -8,8 +8,8 @@
 (
 s.waitForBoot {
 ~labels = LabeledSoundFile.read(
-	"/Volumes/data/archiv/ton/IMM/sound&labels/mehrLicht02.aif", // sound file pfad
-	"/Volumes/data/archiv/ton/IMM/sound&labels/mehrLicht02_labels2.txt" // labels pfad
+		"XXXX", // <-- add your sound file pfad
+		"XXXX" //  <-- add your labels pfad
 );
 }
 );
