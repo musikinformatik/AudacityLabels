@@ -32,8 +32,12 @@ LabelsDictionary : IdentityDictionary {
 		}
 	}
 
+	at { |wort|
+		^this.get(wort)
+	}
+
 	get { |wort, choiceFunc|
-		var value = this.at(wort.asSymbol);
+		var value = super.at(wort.asSymbol);
 		if(wort.isSequenceableCollection) {
 			^wort.collect { |each| this.get(each, choiceFunc) };
 		};
