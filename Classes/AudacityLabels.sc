@@ -54,6 +54,10 @@ LabelsDictionary : IdentityDictionary {
 		}
 	}
 
+	choose {
+		^super.choose.asArray.choose;
+	}
+
 	all { |choiceFunc, sortFunc|
 		var values;
 		values = this.get(this.keys.asArray, choiceFunc);
