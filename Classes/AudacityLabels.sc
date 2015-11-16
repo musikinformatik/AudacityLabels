@@ -12,12 +12,12 @@ LabelsDictionary : IdentityDictionary {
 
 	addAsArray { |wort ... events|
 		var old = this[wort];
-		if(old.isNil) { this[wort] = events } {
+		if(old.isNil) { super[wort] = events } {
 			if(rejectDuplicates and: { this[wort].notNil }) {
 				"Duplicate Labels not allowed, overwriting previous label '%'".format(wort).warn;
-				this[wort] = events.unbubble
+				super[wort] = events.unbubble
 			} {
-				this[wort] = this[wort] ++ events
+				super[wort] = super[wort] ++ events
 			}
 		}
 	}
