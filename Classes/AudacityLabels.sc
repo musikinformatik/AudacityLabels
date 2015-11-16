@@ -10,7 +10,7 @@ LabelsDictionary : IdentityDictionary {
 		^(type: \rest, dur: 0)
 	}
 
-	addAll { |wort ... events|
+	addAsArray { |wort ... events|
 		var old = this[wort];
 		if(old.isNil) { this[wort] = events } {
 			if(rejectDuplicates and: { this[wort].notNil }) {
@@ -30,6 +30,10 @@ LabelsDictionary : IdentityDictionary {
 				item.putAll(propertiesDict)
 			}
 		}
+	}
+
+	put { |wort, event|
+		this.addAsArray(wort, event)
 	}
 
 	at { |wort|
@@ -65,7 +69,7 @@ LabelsDictionary : IdentityDictionary {
 		^values.sort(sortFunc)
 	}
 
-	addEvent { |wort, t0, t1|
+	putEvent { |wort, t0, t1| // rename later.
 		var event = (
 			wort: wort,
 			t0: t0,
@@ -79,7 +83,7 @@ LabelsDictionary : IdentityDictionary {
 				~dur = abs((~t1 - ~t0) / ~rate) + ~gap;
 			}
 		);
-		this.addAll(wort, event)
+		this.addAsArray(wort, event)
 	}
 
 
@@ -105,6 +109,10 @@ AbstractAudacityLabels {
 
 	at { |wort|
 		^dict.get(wort).copy // make a copy by default.
+	}
+
+	put { |wort, event|
+		dict.put(wort, event)
 	}
 
 	all { |choiceFunc, sortFunc|
@@ -142,7 +150,7 @@ AudacityLabels : AbstractAudacityLabels {
 				} {
 					wort = wort.asSymbol
 				};
-				dict.addEvent(wort, t0, t1);
+				dict.putEvent(wort, t0, t1);
 				if(verbose) { wort.post; " ".post; }
 			};
 		});
@@ -185,10 +193,24 @@ LabeledSoundFile : AbstractAudacityLabels {
 			labels.read(labelPath);
 			labels.dict.addProperties(bufevent);
 			labels.dict.keysValuesDo { |wort, event|
-				dict.addAll(wort, *event);
+				dict.addAsArray(wort, *event);
 			};
 			finishFunc.value(this);
 		}
+	}
+
+	putEvent { |wort, event| // assumes that buffer is in \buffer key.
+		var buffer = event[\buffer];
+		if(buffer.notNil) {
+			if({ buffers.includesEqual(buffer).not }) {
+				buffers = buffers.add(buffer);
+			};
+			if(event[\instrument].isNil) {
+				event[\instrument] = if(buffer.numChannels == 2) { \labelPlayer_2 } { \labelPlayer_1 };
+			};
+		};
+		event[\wort] = wort;
+		dict.addAsArray(wort, event);
 	}
 
 	getBuffer { |server, path|
