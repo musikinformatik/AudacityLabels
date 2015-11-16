@@ -65,6 +65,23 @@ LabelsDictionary : IdentityDictionary {
 		^values.sort(sortFunc)
 	}
 
+	addEvent { |wort, t0, t1|
+		var event = (
+			wort: wort,
+			t0: t0,
+			t1: t1,
+			rate: 1.0,
+			gap: 0.0,
+			finish: {
+				var dt = ~t1 - ~t0;
+				~start !? { ~t0 = ~t0 + (dt * ~start) };
+				~end !? { ~t1 = ~t0 + (dt * ~end) };
+				~dur = abs((~t1 - ~t0) / ~rate) + ~gap;
+			}
+		);
+		this.addAll(wort, event)
+	}
+
 
 }
 
@@ -72,6 +89,7 @@ AbstractAudacityLabels {
 
 	var <rejectDuplicates = false;
 	var <dict, <>verbose = true;
+	var numberWord = 0;
 
 	*new { |rejectDuplicates|
 		^super.newCopyArgs(rejectDuplicates).clear
@@ -111,7 +129,7 @@ AudacityLabels : AbstractAudacityLabels {
 	parseAndAddLabels { |string, labelPath|
 		var zeilen = string.split(Char.nl);
 		if(verbose) { "Reading labels from: %\n\n".postf(labelPath) };
-		zeilen.do({ |zeile, i|
+		zeilen.do({ |zeile|
 			var daten, t0, t1, wort, event;
 			daten = zeile.split(Char.tab);
 			if(daten.size >= 3) {
@@ -119,24 +137,12 @@ AudacityLabels : AbstractAudacityLabels {
 				t1 = daten[1].replace(",", ".").asFloat;
 				wort = daten[2];
 				if(wort.isEmpty or: { wort.every { |char| char.isSpace }}) {
-					wort = i
+					wort = numberWord;
+					numberWord = numberWord + 1;
 				} {
 					wort = wort.asSymbol
 				};
-				event = (
-					wort: wort,
-					t0: t0,
-					t1: t1,
-					rate: 1.0,
-					gap: 0.0,
-					finish: {
-						var dt = ~t1 - ~t0;
-						~start !? { ~t0 = ~t0 + (dt * ~start) };
-						~end !? { ~t1 = ~t0 + (dt * ~end) };
-						~dur = abs((~t1 - ~t0) / ~rate) + ~gap;
-					}
-				);
-				dict.addAll(wort, event);
+				dict.addEvent(wort, t0, t1);
 				if(verbose) { wort.post; " ".post; }
 			};
 		});
@@ -174,7 +180,7 @@ LabeledSoundFile : AbstractAudacityLabels {
 			var buffer = this.getBuffer(server, soundFilePath);
 			server.sync;
 			defName = if(buffer.numChannels == 2) { \labelPlayer_2 } { \labelPlayer_1 };
-			bufevent = (server: server, buffer: buffer,instrument: defName);
+			bufevent = (server: server, buffer: buffer, instrument: defName);
 			labels = AudacityLabels(rejectDuplicates).verbose_(verbose);
 			labels.read(labelPath);
 			labels.dict.addProperties(bufevent);
