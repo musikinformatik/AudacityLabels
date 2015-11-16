@@ -104,7 +104,7 @@ AbstractAudacityLabels {
 	}
 
 	at { |wort|
-		^dict.get(wort)
+		^dict.get(wort).copy // make a copy by default.
 	}
 
 	all { |choiceFunc, sortFunc|
