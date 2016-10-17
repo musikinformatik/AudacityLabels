@@ -1,10 +1,14 @@
 
 // von auszen neue "verben" einführen geht so:
-~verben['?'] = { |liste| liste.do({ |x| x.put(\rate, rrand(2.0, 2.2)).put(\out, 1); }) };
+~verben['?'] = { |liste, von, bis| liste[von..bis].do({ |x| x.put(\rate, rrand(2.0, 2.2)) }) };
 // mit weniger mickey mousing:
-~verben['?'] = { |liste| liste.do({ |x| x.put(\rate, rrand(1.0, 1.2)).put(\out, 1); }) };
+~verben['?'] = { |liste, von, bis| liste[von..bis].do({ |x| x.put(\rate, rrand(1.0, 1.2)) }) };
 // oder nur das letzte
-~verben['?'] = { |liste| liste.last.put(\rate, rrand(1.0, 1.2)).put(\out, 1); };
+~verben['?'] = { |liste, von, bis| liste.last.put(\rate, rrand(1.0, 1.2)) };
+
+~verspreche.value("the missile knows greater at all ? times *");
+~stop.value;
+
 
 // zufällige reihenfolge und manche rückwärts
 (
