@@ -5,16 +5,12 @@
 
 
 
+
 (
-s.waitForBoot {
-~labels = LabeledSoundFile.read(
-		"XXXX", // <-- add your sound file pfad
-		"XXXX" //  <-- add your labels pfad
+var soundFilePath = "../example-data/afguide-first.wav".resolveRelative;
+var labelFilePath = "../example-data/afguide-first.txt".resolveRelative;
+s.waitForBoot { ~labels = LabeledSoundFile.read(soundFilePath, labelFilePath) }
 );
-}
-);
-
-
 
 
 (
