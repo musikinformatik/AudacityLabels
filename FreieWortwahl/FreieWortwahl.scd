@@ -22,7 +22,7 @@ var verben = (
 		var max;
 		liste[von .. bis].do({ |x|
 			x.play;
-			x[\wort].postln;
+			x[\wort].post; " ".post;
 		});
 		max = liste.value.maxItem({ |x| x[\dur] });
 		if(max.notNil) { max[\dur].wait };
@@ -32,7 +32,7 @@ var verben = (
 	'*': { |liste, von, bis|
 		liste[von .. bis].do({ |x|
 			x.play;
-			x[\wort].postln;
+			x[\wort].post; " ".post;
 			x[\dur].wait;
 		});
 	}
@@ -41,8 +41,15 @@ var verben = (
 
 var kanaele = ();
 
+var zerteile = { |satz|
+	var brocken;
+	brocken = satz.separate { |a, b| a.isSpace and: b.isSpace.not };
+	brocken.collect { |wort| wort.reject { |buchstabe| buchstabe.isSpace } }
+};
+
 var verwandle = { |satz|
-	var events, woerter = satz.split($ );
+	var events;
+	var woerter = zerteile.(satz);
 
 	woerter.do { |wort|
 		var verb, event;
@@ -96,15 +103,18 @@ var verspreche = { |satz, kanal = \standard|
 
 };
 
-var setzeFort = { |keller| keller[\condition].unhang };
+var setzeFort = { |keller|
+	if(keller[\prozess].isPlaying.not) { keller[\prozess].play };
+	keller[\condition].unhang
+};
 
 var starte = { |keller|
-	keller[\prozess] = fork {
+	keller[\prozess] = Task {
 		var von = 0, bis = 0, event;
 		loop {
 			event = keller[\inhalt][bis];
 			if(event.notNil and: { event[\type] == \verb }) {
-				"VERB: %\n".postf(event[\wort]);
+				"=======  VERB: %\n".postf(event[\wort]);
 				event[\play].value(keller[\inhalt], von, bis - 1);
 				von = bis = bis + 1
 			} {
@@ -112,38 +122,45 @@ var starte = { |keller|
 			};
 
 			if(bis > (keller[\inhalt].lastIndex)) {
+				"\n\n... WARTE AUF NEUE EINGABE".postln;
 				keller[\condition].hang;
 			}
 		};
-	}
+	}.play
 };
 
 var stop = { |kanal = \standard|
 	var keller = kanaele[kanal];
 	keller[\prozess].stop;
+	keller[\prozess] = nil;
 	keller[\inhalt].clear;
 	kanaele[kanal] = nil;
 };
 
 if(~labels.isNil) {
-	"Ich kann leider keine Sound File Labels finden. Bitte noch nachladen!".warn;
+	"Ich kann leider keine Soundfile Labels finden. Bitte noch nachladen!".warn;
 };
 
 // external access
 ~verben = verben;
 ~verspreche = verspreche;
+~sage = sage;
 ~kanaele = kanaele;
 ~stop = stop;
-~sage = sage;
 )
 
-~verspreche.value("obtains ."); ~verspreche.value("obtains . ");
 
+
+
+~sage.("the missile knows where it is at all times it knows this because it knows where it isn't by subtracting where it is from where it isn't or where it isn't from where it is whichever is greater it obtains a difference or deviation");
+
+~sage.("the missile knows where it is at all times it knows this because it knows where it isn't by subtracting where it is from where it isn't or where it isn't from where it is whichever is greater it obtains a difference or deviation".split($ ).scramble.join($ ));
+
+~verspreche.value("isn't"); ~verspreche.value("knows"); ~verspreche.value("is");
 ~verspreche.value("obtains deviation * ");
 ~verspreche.value("obtains deviation * deviation times *");
+~sage.value("the missile knows greater at all times mmlli times times tiimes");
 
-
-~verspreche.value("the missile knows greater at all times mmlli times times tiimes");
 ~sage.value("the the");
 
 ~labels.dict.keys
