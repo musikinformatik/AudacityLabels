@@ -85,13 +85,13 @@ var verben = (
 
 // ~versprechen.value("ergebnis alleine n liebe zwergenaufstand kriegsfall");
 
-~versprechen.value("ergebnis zwergenaufstand ? alleine n liebe liebe"); // geht das?
-~versprechen.value("zwang entgegen ergebnis zwergenaufstand % ? n"); // geht das?
+~versprechen.value("the missile knows greater at all times .");
+~versprechen.value("it obtain a deviation . where where where p it isn't");
 
-~labels[\liebe].copy.play;
+~labels[\obtains].copy.play;
 ~labels.dict.keys; // alle wörter
 
-~versprechen.value("erfahrungswert funktionalitaet entgegen"); // geht das?
+~versprechen.value("it obtain a deviation ?"); // geht das?
 
 
 
@@ -112,17 +112,14 @@ SynthDef(\raum, { |out, gate = 1|
 };
 )
 
-~versprechen.value("zwang entgegen ergebnis zwergenaufstand uhu .");
+~versprechen.value("the missile knows greater at uhu all times .");
 
 
-~versprechen.value("zwang entgegen ergebnis zwergenaufstand uhu uhu uhu .");
-~versprechen.value("zwang entgegen ergebnis zwergenaufstand % ? uhu uhu uhu ."); // immer den uhu am ende!
+~versprechen.value("the missile uhu . knows greater at uhu . all times uhu .");
 
 
 ~labels.dict.keys
 
-
-~versprechen.value("zwang liebe . alleine liebe entgegen n liebe");
 
 (
 preProcessor = { |str|
@@ -131,8 +128,8 @@ preProcessor = { |str|
 )
 
 
---ergebnis
---zwang alleine n uhu zwergenaufstand
+--greater
+--greater at all uhu
 
 
 
