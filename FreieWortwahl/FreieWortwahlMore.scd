@@ -1,23 +1,70 @@
+~stop.value;
 
 // von auszen neue "verben" einführen geht so:
 ~verben['?'] = { |liste| liste.do({ |x| x.put(\rate, rrand(2.0, 2.2)) }) };
+~sage.value("the missile knows greater at all times ?");
+
 // mit weniger mickey mousing:
 ~verben['?'] = { |liste| liste.do({ |x| x.put(\rate, rrand(1.0, 1.2)) }) };
+~sage.value("the missile knows greater at all times ?");
+
+
 // oder nur das letzte
 ~verben['?'] = { |liste| liste.last.put(\rate, rrand(1.0, 1.2)); liste };
+~sage.value("the missile knows greater at all times ?");
 
-~sage.value("the missile knows greater at all times ? *");
-~stop.value;
+
 
 
 // zufällige reihenfolge und manche rückwärts
 (
 ~verben['%'] = { |liste|
 	liste = liste.scramble;
-	liste.do { |x| if(0.5.coin) { x[\rate] = (x[\rate] ? 1.0).neg }};
+	liste.do { |x| if(0.3.coin) { x[\rate] = (x[\rate] ? 1.0).neg }};
 	liste
 };
 );
+
+~sage.value("the missile knows greater at all times %");
+~sage.value("the missile knows greater at all times % ?");
+
+
+
+// jedes wort im takt
+(
+~verben['*='] = { |liste|
+	liste.do { |x|
+		x.play;
+		x[\wort].post; " ".post;
+		1.wait; //TempoClock.default.timeToNextBeat(1).wait;
+	};
+	[]
+}
+)
+
+~stop.();
+~sage.value("the missile knows greater at all times *=");
+
+
+
+
+/*
+(
+~verben['*=='] = { |liste|
+var zeitDieWirHaben = TempoClock.default.timeToNextBeat(2);
+var totalNormalDur = liste.sum { |x| x[\dur] ? 0 };
+var rate = totalNormalDur / zeitDieWirHaben;
+"rate: ".post; rate.postln;
+liste.do({ |x| x.put(\rate, rate) });
+liste
+};
+)
+*/
+
+~verspreche.value("the missile knows *= *  greater at all times *= *");
+~stop.value;
+~kanaele[\standard][\inhalt]
+
 
 
 // ~verspreche.value("ergebnis alleine n liebe zwergenaufstand kriegsfall");

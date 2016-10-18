@@ -41,7 +41,7 @@ loadRelative("wortwahl-library.scd");
 ~kanaele[\standard]
 
 
-
+~labels.dict[\greater].cs
 
 /////////////////////////////////////////////////////
 
