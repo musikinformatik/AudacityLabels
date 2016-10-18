@@ -18,7 +18,7 @@
 			liste.do({ |x|
 				x.play;
 				x[\wort].post; " ".post;
-				x[\dur].wait;
+				x[\dur].postln.wait;
 			});
 			[]
 		}
@@ -43,7 +43,7 @@
 			verb = verben[wort];
 
 			if(verb.isNil) {
-				event = ~labels.at(wort);
+				event = ~labels.at(wort).copy;
 				if(event.isNil) {
 					event = (freq: \rest, dur: 0.5pi.rand, wort: "(%)".format(wort))
 				}
@@ -59,7 +59,7 @@
 
 	var sage = { |satz,  kanal = \standard|
 		var last = satz.split($ ).last.asSymbol;
-		if(verben[last].isNil) {
+		if(last != '*') {
 			satz = satz ++ " *";
 		};
 		verspreche.(satz)
