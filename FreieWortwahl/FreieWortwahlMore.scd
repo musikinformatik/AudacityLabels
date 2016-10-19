@@ -34,9 +34,10 @@
 (
 ~verben['*='] = { |liste|
 	liste.do { |x|
+		var dt = TempoClock.default.timeToNextBeat(1).postln;
 		x.play;
 		x[\wort].post; " ".post;
-		1.wait; //TempoClock.default.timeToNextBeat(1).wait;
+		dt.wait; //1.wait;
 	};
 	[]
 }
@@ -84,17 +85,25 @@ SynthDef(\raum, { |out, gate = 1|
 	var input = In.ar(out, 2);
 	var env = EnvGen.kr(Env.asr, gate);
 	var sig = GVerb.ar(input.sum * env, Rand(4, 11), revtime: Rand(0.4, 0.5), damping:Rand(0.1, 0.8));
+	sig = Limiter.ar(sig, 0.5);
 	DetectSilence.ar(sig, doneAction: 2);
 	ReplaceOut.ar(out, sig + (0.8 * input))
 }).add;
 
 ~verben[\uhu] = { |liste|
-	var on = (type: \on, instrument: \raum, addAction: \addToTail);
+	var on = (type: \on, instrument: \raum, addAction: \addToTail, dur: 0);
 	var off = on.copy.put(\type, \off);
 	liste = liste.addFirst(on).add(off);
+	liste
 };
 )
 
 ~sage.value("the missile knows greater at all times uhu *");
 
 ~verspreche.value("the missile uhu knows greater at uhu all times uhu *");
+
+
+// alles zusammen:
+
+~verspreche.value("the missile uhu knows greater ? at uhu all times uhu *");
+
