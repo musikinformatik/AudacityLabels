@@ -48,7 +48,7 @@
 					event = (freq: \rest, dur: 0.5pi.rand, wort: "(%)".format(wort))
 				}
 			} {
-				event = (type: \verb, wort: wort, play: verb)
+				event = (type: \verb, wort: wort, verb: verb)
 			};
 			events = events.add(event);
 
@@ -116,7 +116,7 @@
 
 					bisher = keller[\inhalt][..bis - 1]; // what has happened so far
 
-					bisher = event[\play].value(bisher);
+					bisher = event[\verb].value(bisher);
 
 					zukunft = keller[\inhalt][bis ..].drop(1); // drop verb, keep future
 					postf("\nVERB: neuer keller: %  ++ %\n", postx.(bisher), postx.(zukunft));
@@ -135,11 +135,13 @@
 
 	var stop = { |kanal = \standard|
 		var keller = kanaele[kanal];
-		keller !? {
+		if(keller.notNil) {
 			keller[\prozess].stop;
 			keller[\prozess] = nil;
 			keller[\inhalt].clear;
 			kanaele[kanal] = nil;
+		} {
+			"Es existiert noch kein Kanal namens %\n".postf(kanal).warn
 		}
 	}.flop;
 
@@ -147,7 +149,11 @@
 
 	var pause = { |kanal = \standard|
 		var keller = kanaele[kanal];
-		keller[\prozess].stop;
+		if(keller.notNil) {
+			keller[\prozess].stop
+		} {
+			"Es existiert noch kein Kanal namens %\n".postf(kanal).warn
+		}
 	}.flop;
 
 	var pauseAll = { pause.(kanaele.keys) };
