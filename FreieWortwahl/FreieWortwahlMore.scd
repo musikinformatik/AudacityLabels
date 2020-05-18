@@ -83,27 +83,28 @@ liste
 (
 SynthDef(\raum, { |out, gate = 1|
 	var input = In.ar(out, 2);
-	var env = EnvGen.kr(Env.asr, gate);
+	var env = EnvGen.kr(Env.asr(0.01, 1, 0.1), gate);
 	var sig = GVerb.ar(input.sum * env, Rand(4, 11), revtime: Rand(0.4, 0.5), damping:Rand(0.1, 0.8));
 	sig = Limiter.ar(sig, 0.5);
 	DetectSilence.ar(sig, doneAction: 2);
 	ReplaceOut.ar(out, sig + (0.8 * input))
 }).add;
 
-~verben[\uhu] = { |liste|
+~verben['*uhu'] = { |liste|
 	var on = (type: \on, instrument: \raum, addAction: \addToTail, dur: 0);
 	var off = on.copy.put(\type, \off);
-	liste = liste.addFirst(on).add(off);
+	liste = liste.drop(-1).add(on).add(liste.last).add(off);
+	liste.collect { |x| x[\wort] }.postln;
 	liste
 };
 )
 
-~sage.value("the missile knows greater at all times uhu *");
+~sage.value("all times *uhu knows greater");
 
-~verspreche.value("the missile uhu knows greater at uhu all times uhu *");
+~sage.value("the the the insn't missile *uhu knows greater at uhu all times *uhu *");
 
 
 // alles zusammen:
 
-~verspreche.value("the missile uhu knows greater ? at uhu all times uhu *");
+~verspreche.value("the missile *uhu knows greater ? at *uhu all times uhu *");
 
