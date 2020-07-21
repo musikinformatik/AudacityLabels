@@ -81,6 +81,7 @@ LabelsDictionary : IdentityDictionary {
 				~start !? { ~t0 = ~t0 + (dt * ~start) };
 				~end !? { ~t1 = ~t0 + (dt * ~end) };
 				~dur = abs((~t1 - ~t0) / ~rate) + ~gap;
+				if(~dur.isArray) { ~dur = ~dur[~guideIndex ? 0] };
 			}
 		);
 		this.addAsArray(wort, newEvent)
