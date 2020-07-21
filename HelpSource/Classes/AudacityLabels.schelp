@@ -8,6 +8,8 @@ To create the labels in Audacity, go to code::Tracks>Add Label At Selection::.
 
 To export them, use: code::File>Export Labels::.
 
+For interfacing with the event and pattern system, the class code::LabeledSoundFile:: can be used. For some examples, see the file code::intro.scd::.
+
 CLASSMETHODS::
 
 METHOD::read
