@@ -228,6 +228,22 @@ LabeledSoundFile : AbstractAudacityLabels {
 		^buffer
 	}
 
+	// add information from a WavesetsEvent (see Quark with the same name)
+	putXings { |wavesetsEvent|
+		var wsets = wavesetsEvent.wavesets.xings;
+		var lastFrame = wsets.size - 1;
+		var samplerate = buffers.first.sampleRate;
+		var findWsIndex = { |frame| wsets.detectIndex { |x| x > frame } ? lastFrame };
+		this.dict.do { |event|
+			event.do { |item|
+				item.use {
+					~x0 = findWsIndex.(~t0 * samplerate);
+					~x1 = findWsIndex.(~t1 * samplerate);
+				};
+			};
+		};
+	}
+
 	maxWordSize {
 		var max = 0;
 		dict.keysDo { |name| max = max(max, name.asString.size) };
