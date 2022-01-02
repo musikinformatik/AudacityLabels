@@ -252,47 +252,48 @@ LabeledSoundFile : AbstractAudacityLabels {
 
 	*initClass {
 
-		Class.initClassTree(SynthDescLib);
+		StartUp.add({
 
-		SynthDef(\labelPlayer_1, { |out = 0, rate = 1, t0, t1, buffer, pan, amp = 0.1|
-			var sustain;
-			var ton, env, channels;
-			sustain = abs((t1 - t0) / rate); // Gesamtdauer
-			env = EnvGen.kr(
-				Env.linen(0.001, sustain, 0.01, (amp * 10)),
-				doneAction:2 // die Hüllkurve beendet den Synth
-			);
+			SynthDef(\labelPlayer_1, { |out = 0, rate = 1, t0, t1, buffer, pan, amp = 0.1|
+				var sustain;
+				var ton, env, channels;
+				sustain = abs((t1 - t0) / rate); // Gesamtdauer
+				env = EnvGen.kr(
+					Env.linen(0.001, sustain, 0.01, (amp * 10)),
+					doneAction:2 // die Hüllkurve beendet den Synth
+				);
 
-			ton = env * PlayBuf.ar(
-				1, // mono
-				buffer, // der buffer,
-				rate * BufRateScale.kr(buffer), // Abspielrate mit Ausgleich
-				startPos:BufSampleRate.kr(buffer) * t0, // Startposition
-				loop: 1 // falls wir versehentlich über das Ende hinausgehen
-			);
-			OffsetOut.ar(out, Pan2.ar(ton, pan))
-		}).add;
+				ton = env * PlayBuf.ar(
+					1, // mono
+					buffer, // der buffer,
+					rate * BufRateScale.kr(buffer), // Abspielrate mit Ausgleich
+					startPos:BufSampleRate.kr(buffer) * t0, // Startposition
+					loop: 1 // falls wir versehentlich über das Ende hinausgehen
+				);
+				OffsetOut.ar(out, Pan2.ar(ton, pan))
+			}).add;
 
-		SynthDef(\labelPlayer_2, { |out = 0, rate = 1, t0, t1, buffer, pan, amp = 0.1|
-			var sustain;
-			var ton, env, channels;
+			SynthDef(\labelPlayer_2, { |out = 0, rate = 1, t0, t1, buffer, pan, amp = 0.1|
+				var sustain;
+				var ton, env, channels;
 
-			sustain = abs((t1 - t0) / rate); // Gesamtdauer
-			env = EnvGen.kr(
-				Env.linen(0.001, sustain, 0.01, (amp * 10)),
-				doneAction:2 // die Hüllkurve beendet den Synth
-			);
+				sustain = abs((t1 - t0) / rate); // Gesamtdauer
+				env = EnvGen.kr(
+					Env.linen(0.001, sustain, 0.01, (amp * 10)),
+					doneAction:2 // die Hüllkurve beendet den Synth
+				);
 
-			ton = env * PlayBuf.ar(
-				2, // stereo
-				buffer, // der buffer,
-				rate * BufRateScale.kr(buffer), // Abspielrate mit Ausgleich
-				startPos:BufSampleRate.kr(buffer) * t0, // Startposition
-				loop: 1 // falls wir versehentlich über das Ende hinausgehen
-			);
-			OffsetOut.ar(out, Balance2.ar(ton[0], ton[1], pan))
-		}).add;
+				ton = env * PlayBuf.ar(
+					2, // stereo
+					buffer, // der buffer,
+					rate * BufRateScale.kr(buffer), // Abspielrate mit Ausgleich
+					startPos:BufSampleRate.kr(buffer) * t0, // Startposition
+					loop: 1 // falls wir versehentlich über das Ende hinausgehen
+				);
+				OffsetOut.ar(out, Balance2.ar(ton[0], ton[1], pan))
+			}).add;
 
+		})
 
 	}
 
