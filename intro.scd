@@ -5,7 +5,7 @@
 var rejectDuplicates = true;
 var soundFilePath = "example-data/afguide-first.wav".resolveRelative;
 var labelFilePath = "example-data/afguide-first.txt".resolveRelative;
-s.waitForBoot { ~labels = LabeledSoundFile.new.rejectDuplicates_(rejectDuplicates).read(soundFilePath, labelFilePath) }
+s.waitForBoot { ~labels = LabeledSoundFile(rejectDuplicates: rejectDuplicates).read(soundFilePath, labelFilePath) }
 );
 
 
